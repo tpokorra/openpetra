@@ -22,6 +22,52 @@
 // along with OpenPetra.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+'use strict';
+
+const e = React.createElement;
+
+const columns = [
+  { key: "id", name: "ID", editable: true },
+  { key: "title", name: "Title", editable: true },
+  { key: "complete", name: "Complete", editable: true }
+];
+
+const rows = [
+  { id: 0, title: "Task 1", complete: 20 },
+  { id: 1, title: "Task 2", complete: 40 },
+  { id: 2, title: "Task 3", complete: 60 }
+];
+
+class BatchGrid extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { rows };
+  }
+/*
+  onGridRowsUpdated = ({ fromRow, toRow, updated }) => {
+    this.setState(state => {
+      const rows = state.rows.slice();
+      for (let i = fromRow; i <= toRow; i++) {
+        rows[i] = { ...rows[i], ...updated };
+      }
+      return { rows };
+    });
+  };
+  */
+  render() {
+    return React.createElement("ReactDataGrid", {
+        columns:columns,
+        rowGetter:function(i){return this.state.rows[i];},
+        rowsCount:3,
+        onGridRowsUpdated: this.onGridRowsUpdated,
+        enableCellSelect:true});
+  }
+}
+
+const domContainer = document.querySelector('#like_button_container');
+ReactDOM.render(e(BatchGrid), domContainer);
+
+
 $('document').ready(function () {
 	get_available_years(
 		'#tabfilter [name=ABatchYear]',
@@ -48,7 +94,7 @@ function load_preset() {
 	}
 }
 
-function display_list(source) {
+function display_list(source, BatchNumber) {
 	if (source == null) {
 		source = "filter";
 	}
@@ -71,7 +117,30 @@ function display_list(source) {
 		}
 		format_currency(data.ACurrencyCode);
 		format_date();
+
+		if (BatchNumber != null) {
+			open_transactions($(), BatchNumber);
+		}
 	})
+}
+
+function updateBatch(BatchNumber) {
+	alert(BatchNumber);
+
+	var x = {
+		'ALedgerNumber': window.localStorage.getItem('current_ledger'),
+		'ABatchNumber': BatchNumber};
+
+	api.post('serverMFinance.asmx/TGLTransactionWebConnector_LoadABatch2', x).then(function (data) {
+		data = JSON.parse(data.data.d);
+		item = data.result.ABatch[0];
+		let row = format_tpl($("[phantom] .tpl_row").clone(), item);
+		$('#Batch' + BatchNumber + " div").first().html(row.children()[0]);
+	});
+}
+
+function update_list(source) {
+	console.log("update_list");
 }
 
 function format_date() {
@@ -257,7 +326,7 @@ function save_edit_batch(obj_modal) {
 		if (parsed.result == true) {
 			display_message(i18next.t('forms.saved'), "success");
 			$('#modal_space .modal').modal('hide');
-			display_list();
+			updateBatch(payload['ABatchNumber']);
 		}
 		if (parsed.result == "false") {
 			for (msg of parsed.AVerificationResult) {
@@ -289,7 +358,7 @@ function save_edit_trans(obj_modal) {
 		if (parsed.result == true) {
 			display_message(i18next.t('forms.saved'), "success");
 			$('#modal_space .modal').modal('hide');
-			display_list();
+			update_list();
 		}
 		if (parsed.result == "false") {
 			for (msg of parsed.AVerificationResult) {

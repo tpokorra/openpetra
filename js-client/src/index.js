@@ -2,9 +2,10 @@
 // DO NOT REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 //
 // @Authors:
-//	   Timotheus Pokorra <tp@tbits.net>
+//	   Timotheus Pokorra <timotheus.pokorra@solidcharity.com>
 //
 // Copyright 2017-2018 by TBits.net
+// Copyright 2019 SolidCharity.com
 //
 // This file is part of OpenPetra.
 //
@@ -29,6 +30,9 @@ i18next = require('i18next');
 axios = require('axios');
 i18nextXHRBackend = require('i18next-xhr-backend');
 i18nextBrowserLanguageDetector = require('i18next-browser-languagedetector');
+React = require('react');
+ReactDOM = require('react-dom');
+ReactDataGrid = require('react-data-grid');
 //require('./lib/ajax.js');
 //require('./lib/auth.js');
 //require('./lib/i18n.js');
